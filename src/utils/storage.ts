@@ -2,10 +2,12 @@ import Taro from '@tarojs/taro';
 
 const STORAGE_KEYS = {
   MY_QUESTIONS: 'my_questions',
+  MY_ANSWERS: 'my_answers',
   MY_COLLECTIONS: 'my_collections',
   MOOD_RECORDS: 'mood_records',
   MY_VOTES: 'my_votes',
-  REPORTS: 'reports'
+  MY_REPORTS: 'my_reports',
+  MY_FOLLOWUPS: 'my_followups'
 };
 
 export const storage = {
@@ -47,12 +49,74 @@ export interface CollectionItem {
   createdAt: string;
 }
 
+export interface AnswerItem {
+  id: string;
+  questionId: string;
+  content: string;
+  author: string;
+  likeCount: number;
+  isAdopted: boolean;
+  createdAt: string;
+}
+
+export interface ReportItem {
+  id: string;
+  type: 'question' | 'answer' | 'experience';
+  targetId: string;
+  targetContent?: string;
+  reason: string;
+  status: 'pending' | 'processed';
+  createdAt: string;
+}
+
+export interface FollowupItem {
+  id: string;
+  answerId: string;
+  questionId: string;
+  questionTitle: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface VoteRecord {
+  id: string;
+  voteId: string;
+  voteTitle: string;
+  selectedOptions: string[];
+  totalOptions: number;
+  participatedAt: string;
+}
+
 export const questionStorage = {
   getMyQuestions: () => storage.get(STORAGE_KEYS.MY_QUESTIONS, []),
   addQuestion: (question) => {
     const questions = questionStorage.getMyQuestions();
     questions.unshift(question);
     storage.set(STORAGE_KEYS.MY_QUESTIONS, questions);
+  }
+};
+
+export const answerStorage = {
+  getMyAnswers: () => storage.get(STORAGE_KEYS.MY_ANSWERS, []),
+  getAnswersByQuestion: (questionId: string) => {
+    const answers = answerStorage.getMyAnswers();
+    return answers.filter(a => a.questionId === questionId);
+  },
+  addAnswer: (answer: AnswerItem) => {
+    const answers = answerStorage.getMyAnswers();
+    answers.unshift(answer);
+    storage.set(STORAGE_KEYS.MY_ANSWERS, answers);
+  },
+  updateAnswer: (updatedAnswer: AnswerItem) => {
+    const answers = answerStorage.getMyAnswers();
+    const index = answers.findIndex(a => a.id === updatedAnswer.id);
+    if (index !== -1) {
+      answers[index] = updatedAnswer;
+      storage.set(STORAGE_KEYS.MY_ANSWERS, answers);
+    }
+  },
+  getAnswerCount: () => {
+    return answerStorage.getMyAnswers().length;
   }
 };
 
@@ -86,6 +150,9 @@ export const collectionStorage = {
   isTemplateCollected: (content: string) => {
     const collections = collectionStorage.getCollections();
     return collections.some(c => c.type === 'template' && c.content === content);
+  },
+  getCollectionCount: () => {
+    return collectionStorage.getCollections().length;
   }
 };
 
@@ -95,6 +162,9 @@ export const moodStorage = {
     const records = moodStorage.getRecords();
     records.unshift(record);
     storage.set(STORAGE_KEYS.MOOD_RECORDS, records);
+  },
+  getRecordCount: () => {
+    return moodStorage.getRecords().length;
   }
 };
 
@@ -102,8 +172,11 @@ export const voteStorage = {
   getMyVotes: () => storage.get(STORAGE_KEYS.MY_VOTES, []),
   addVote: (vote) => {
     const votes = voteStorage.getMyVotes();
-    votes.unshift(vote);
-    storage.set(STORAGE_KEYS.MY_VOTES, votes);
+    const exists = votes.some(v => v.id === vote.id);
+    if (!exists) {
+      votes.unshift(vote);
+      storage.set(STORAGE_KEYS.MY_VOTES, votes);
+    }
   },
   updateVote: (updatedVote) => {
     const votes = voteStorage.getMyVotes();
@@ -116,14 +189,33 @@ export const voteStorage = {
   getVoteById: (id: string) => {
     const votes = voteStorage.getMyVotes();
     return votes.find(v => v.id === id);
+  },
+  getVotedCount: () => {
+    const votes = voteStorage.getMyVotes();
+    return votes.filter(v => v.hasVoted).length;
   }
 };
 
 export const reportStorage = {
-  getReports: () => storage.get(STORAGE_KEYS.REPORTS, []),
-  addReport: (report) => {
+  getReports: (): ReportItem[] => storage.get(STORAGE_KEYS.MY_REPORTS, []),
+  addReport: (report: ReportItem) => {
     const reports = reportStorage.getReports();
     reports.unshift(report);
-    storage.set(STORAGE_KEYS.REPORTS, reports);
+    storage.set(STORAGE_KEYS.MY_REPORTS, reports);
+  },
+  getReportCount: () => {
+    return reportStorage.getReports().filter(r => r.status === 'pending').length;
+  }
+};
+
+export const followupStorage = {
+  getFollowups: (): FollowupItem[] => storage.get(STORAGE_KEYS.MY_FOLLOWUPS, []),
+  addFollowup: (followup: FollowupItem) => {
+    const followups = followupStorage.getFollowups();
+    followups.unshift(followup);
+    storage.set(STORAGE_KEYS.MY_FOLLOWUPS, followups);
+  },
+  getFollowupCount: () => {
+    return followupStorage.getFollowups().length;
   }
 };

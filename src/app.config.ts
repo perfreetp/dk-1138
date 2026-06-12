@@ -12,7 +12,9 @@ export default defineAppConfig({
     'pages/publish-question/index',
     'pages/my-questions/index',
     'pages/my-collections/index',
-    'pages/mood-records/index'
+    'pages/mood-records/index',
+    'pages/my-reports/index',
+    'pages/my-followups/index'
   ],
   window: {
     backgroundTextStyle: 'light',

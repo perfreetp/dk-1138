@@ -21,14 +21,12 @@ const VoteCard: React.FC<VoteCardProps> = ({ vote, onClick }) => {
     }
   };
 
-  const topOption = vote.options.reduce((prev, current) => 
+  const localVote = voteStorage.getVoteById(vote.id);
+  const displayVote = localVote || vote;
+  
+  const topOption = displayVote.options.reduce((prev, current) => 
     current.voteCount > prev.voteCount ? current : prev
   );
-
-  const displayVote = {
-    ...vote,
-    hasVoted: vote.hasVoted || false
-  };
 
   return (
     <View className={styles.cardContainer} onClick={handleClick}>

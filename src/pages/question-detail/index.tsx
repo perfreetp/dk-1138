@@ -3,18 +3,9 @@ import { View, Text, Input, Textarea, Button } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import { Question, TAG_LABELS, TOPIC_LABELS } from '@/types';
 import { mockQuestions, getQuestionById } from '@/data/questions';
-import { questionStorage } from '@/utils/storage';
+import { questionStorage, answerStorage, AnswerItem, followupStorage } from '@/utils/storage';
 import TagBadge from '@/components/TagBadge';
 import styles from './index.module.scss';
-
-interface AnswerItem {
-  id: string;
-  content: string;
-  author: string;
-  likeCount: number;
-  isAdopted: boolean;
-  createdAt: string;
-}
 
 const QuestionDetailPage: React.FC = () => {
   const router = useRouter();
@@ -33,56 +24,61 @@ const QuestionDetailPage: React.FC = () => {
 
   const loadQuestion = () => {
     const id = router.params.id;
+    let foundQuestion: Question | null = null;
     
     if (id && id !== 'undefined') {
       const myQuestions = questionStorage.getMyQuestions();
       const localQuestion = myQuestions.find(q => q.id === id);
       
       if (localQuestion) {
-        setQuestion(localQuestion);
+        foundQuestion = localQuestion;
         setLikeCount(localQuestion.likeCount || 0);
-        setAnswers(mockAnswers);
-        return;
+        const localAnswers = answerStorage.getAnswersByQuestion(id);
+        setAnswers(localAnswers);
+        const localFollowups = followupStorage.getFollowups();
+        const followedIds = new Set(localFollowups.map(f => f.answerId));
+        setFollowedUp(followedIds);
       }
       
-      const mockQuestion = getQuestionById(id);
-      if (mockQuestion) {
-        setQuestion(mockQuestion);
-        setLikeCount(mockQuestion.likeCount);
-        setAnswers(mockAnswers);
+      if (!foundQuestion) {
+        const mockQuestion = getQuestionById(id);
+        if (mockQuestion) {
+          foundQuestion = mockQuestion;
+          setLikeCount(mockQuestion.likeCount);
+        }
+      }
+    }
+    
+    if (!foundQuestion) {
+      const myQuestions = questionStorage.getMyQuestions();
+      if (myQuestions.length > 0) {
+        const q = myQuestions[0];
+        foundQuestion = q;
+        setLikeCount(q.likeCount || 0);
+        const localAnswers = answerStorage.getAnswersByQuestion(q.id);
+        setAnswers(localAnswers);
+      }
+    }
+    
+    if (foundQuestion) {
+      setQuestion(foundQuestion);
+    }
+  };
+
+  const handleLike = (answerId?: string) => {
+    if (answerId && question) {
+      const myAnswers = answerStorage.getMyAnswers();
+      const answerIndex = myAnswers.findIndex(a => a.id === answerId);
+      if (answerIndex !== -1) {
+        const updated = { ...myAnswers[answerIndex], likeCount: myAnswers[answerIndex].likeCount + 1 };
+        myAnswers[answerIndex] = updated;
+        Taro.setStorageSync('my_answers', myAnswers);
+        setAnswers([...myAnswers.filter(a => a.questionId === question.id)]);
+        Taro.showToast({ title: '点赞成功', icon: 'success' });
         return;
       }
     }
     
-    const myQuestions = questionStorage.getMyQuestions();
-    if (myQuestions.length > 0) {
-      const q = myQuestions[0];
-      setQuestion(q);
-      setLikeCount(q.likeCount || 0);
-      setAnswers(mockAnswers);
-    }
-  };
-
-  const mockAnswers: AnswerItem[] = [
-    {
-      id: 'a1',
-      content: '我之前也遇到过类似的情况，后来主动和老员工沟通，发现其实他们并不是故意排挤我，只是工作太忙没时间照顾新人。建议你找个机会主动和他们聊聊，展现你的诚意和积极性。',
-      author: '职场老鸟',
-      likeCount: 23,
-      isAdopted: false,
-      createdAt: '2024-01-15 12:30'
-    },
-    {
-      id: 'a2',
-      content: '刚入职被排挤很正常，不要太在意。做好自己的本职工作，虚心请教，时间久了大家自然会接受你的。也可以参加一些团队活动，增进彼此了解。',
-      author: '热心同事',
-      likeCount: 15,
-      isAdopted: false,
-      createdAt: '2024-01-15 14:20'
-    }
-  ];
-
-  const handleLike = () => {
     if (question) {
       const newCount = likeCount + 1;
       setLikeCount(newCount);
@@ -94,7 +90,6 @@ const QuestionDetailPage: React.FC = () => {
         myQuestions[index] = { ...question, likeCount: newCount };
         Taro.setStorageSync('my_questions', myQuestions);
       }
-      
       Taro.showToast({ title: '点赞成功', icon: 'success' });
     }
   };
@@ -105,11 +100,20 @@ const QuestionDetailPage: React.FC = () => {
       content: '确定采纳这个回答为最佳答案吗？',
       success: (res) => {
         if (res.confirm) {
-          setAnswers(prev => prev.map(a => ({
-            ...a,
-            isAdopted: a.id === answerId
-          })));
           if (question) {
+            const myAnswers = answerStorage.getMyAnswers();
+            const answerIndex = myAnswers.findIndex(a => a.id === answerId);
+            if (answerIndex !== -1) {
+              myAnswers.forEach((a, idx) => {
+                if (idx === answerIndex) {
+                  a.isAdopted = true;
+                } else if (a.questionId === question.id) {
+                  a.isAdopted = false;
+                }
+              });
+              Taro.setStorageSync('my_answers', myAnswers);
+              setAnswers([...myAnswers.filter(a => a.questionId === question.id)]);
+            }
             setQuestion({ ...question, answerCount: question.answerCount + 1 });
           }
           Taro.showToast({ title: '已采纳', icon: 'success' });
@@ -140,10 +144,29 @@ const QuestionDetailPage: React.FC = () => {
       return;
     }
 
-    if (reportTarget?.type === 'followup') {
+    if (reportTarget?.type === 'followup' && question) {
+      const newFollowup = {
+        id: `f_${Date.now()}`,
+        answerId: reportTarget.id,
+        questionId: question.id,
+        questionTitle: question.title,
+        content: reportReason.replace('追问：', ''),
+        createdAt: new Date().toLocaleString('zh-CN')
+      };
+      followupStorage.addFollowup(newFollowup);
       setFollowedUp(prev => new Set([...prev, reportTarget.id]));
       Taro.showToast({ title: '追问已发送', icon: 'success' });
-    } else {
+    } else if (question) {
+      const newReport = {
+        id: `r_${Date.now()}`,
+        type: reportTarget?.type as 'question' | 'answer' | 'experience',
+        targetId: reportTarget?.id || question.id,
+        targetContent: reportTarget?.type === 'answer' ? '回答内容' : question.title,
+        reason: reportReason,
+        status: 'pending' as const,
+        createdAt: new Date().toLocaleString('zh-CN')
+      };
+      Taro.setStorageSync('my_reports', [newReport, ...(Taro.getStorageSync('my_reports') || [])]);
       Taro.showToast({ title: '举报已提交', icon: 'success' });
     }
 
@@ -158,8 +181,11 @@ const QuestionDetailPage: React.FC = () => {
       return;
     }
 
+    if (!question) return;
+
     const newAnswer: AnswerItem = {
       id: `a_${Date.now()}`,
+      questionId: question.id,
       content: replyText.trim(),
       author: '匿名用户',
       likeCount: 0,
@@ -167,10 +193,11 @@ const QuestionDetailPage: React.FC = () => {
       createdAt: new Date().toLocaleString('zh-CN')
     };
 
-    setAnswers(prev => [...prev, newAnswer]);
-    if (question) {
-      setQuestion({ ...question, answerCount: question.answerCount + 1 });
-    }
+    answerStorage.addAnswer(newAnswer);
+    const allAnswers = answerStorage.getAnswersByQuestion(question.id);
+    setAnswers(allAnswers);
+    
+    setQuestion({ ...question, answerCount: question.answerCount + 1 });
     setReplyText('');
     Taro.showToast({ title: '回答发布成功', icon: 'success' });
   };
@@ -218,7 +245,7 @@ const QuestionDetailPage: React.FC = () => {
             </View>
             <View 
               className={`${styles.statItem} ${styles.statItemClickable}`}
-              onClick={handleLike}
+              onClick={() => handleLike()}
             >
               <Text className={styles.statIcon}>👍</Text>
               <Text className={styles.statText}>{likeCount}</Text>
@@ -261,7 +288,7 @@ const QuestionDetailPage: React.FC = () => {
                   <View className={styles.actionLeft}>
                     <View 
                       className={`${styles.actionButton} ${styles.actionButtonActive}`}
-                      onClick={() => handleLike()}
+                      onClick={() => handleLike(answer.id)}
                     >
                       <Text>👍</Text>
                       <Text>{answer.likeCount}</Text>
@@ -270,7 +297,7 @@ const QuestionDetailPage: React.FC = () => {
                       className={styles.actionButton}
                       onClick={() => handleFollowUp(answer.id)}
                     >
-                      <Text>追问</Text>
+                      <Text>{followedUp.has(answer.id) ? '已追问' : '追问'}</Text>
                     </View>
                   </View>
                   {!answer.isAdopted && (
