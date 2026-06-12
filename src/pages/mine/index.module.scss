@@ -147,7 +147,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: $spacing-md;
+  margin-bottom: $spacing-sm;
 }
 
 .moodLabel {
@@ -160,30 +160,28 @@
   font-weight: $font-weight-semibold;
 }
 
-.moodHappy {
-  color: $color-mood-happy;
-}
-
-.moodCalm {
-  color: $color-mood-calm;
-}
-
-.moodAnxious {
-  color: $color-mood-anxious;
-}
-
-.moodSad {
-  color: $color-mood-sad;
-}
-
-.moodAngry {
-  color: $color-mood-angry;
-}
-
 .moodNote {
   font-size: $font-size-sm;
   color: $color-text-tertiary;
   line-height: $line-height-normal;
+  margin-bottom: $spacing-md;
+}
+
+.moodButton {
+  @include button-reset;
+  background-color: $color-primary;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  padding: $spacing-sm $spacing-lg;
+  border-radius: $radius-button;
+  transition: all $transition-base;
+  width: 100%;
+  
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
 }
 
 .moodTime {
@@ -226,6 +224,7 @@
   border-radius: $radius-button;
   margin-top: $spacing-md;
   transition: all $transition-base;
+  width: 100%;
   
   &:active {
     opacity: 0.9;

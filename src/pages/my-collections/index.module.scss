@@ -1,0 +1,113 @@
+@use '@/styles/variables.scss' as *;
+
+.myCollectionsPage {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding: $page-padding;
+}
+
+.listSection {
+  margin-bottom: $spacing-lg;
+}
+
+.scrollView {
+  height: calc(100vh - 100rpx);
+}
+
+.collectionItem {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all $transition-base;
+  
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.collectionContent {
+  flex: 1;
+}
+
+.collectionType {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  background-color: rgba($color-primary, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: $radius-sm;
+  margin-bottom: $spacing-xs;
+  display: inline-block;
+}
+
+.collectionTitle {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  @include text-ellipsis;
+}
+
+.collectionTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: $spacing-xs;
+}
+
+.removeButton {
+  @include button-reset;
+  width: 64rpx;
+  height: 64rpx;
+  background-color: $color-error;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: $spacing-md;
+  
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.emptyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl * 2 0;
+}
+
+.emptyIcon {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: $radius-round;
+  background-color: $color-bg-hover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: $spacing-lg;
+}
+
+.emptyIconText {
+  font-size: $font-size-xl;
+  color: $color-accent;
+}
+
+.emptyTitle {
+  font-size: $font-size-lg;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-sm;
+}
+
+.emptyDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}

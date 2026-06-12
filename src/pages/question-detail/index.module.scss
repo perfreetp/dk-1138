@@ -3,41 +3,348 @@
 .questionDetailPage {
   min-height: 100vh;
   background-color: $color-bg-page;
-  padding: $page-padding;
+  padding-bottom: 180rpx;
 }
 
-.placeholderContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-}
-
-.placeholderIcon {
-  width: 160rpx;
-  height: 160rpx;
-  border-radius: $radius-round;
-  background-color: $color-bg-hover;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: $spacing-lg;
-}
-
-.placeholderIconText {
-  font-size: $font-size-xxl;
-  color: $color-primary;
-}
-
-.placeholderTitle {
-  font-size: $font-size-xl;
-  color: $color-text-primary;
-  font-weight: $font-weight-semibold;
+.questionSection {
+  background-color: $color-bg-card;
+  padding: $spacing-lg;
   margin-bottom: $spacing-md;
 }
 
-.placeholderDesc {
+.questionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-md;
+}
+
+.questionTags {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.topicTag {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  background-color: $color-bg-hover;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-sm;
+}
+
+.reportButton {
+  @include button-reset;
+  font-size: $font-size-xs;
+  color: $color-error;
+  padding: 4rpx 12rpx;
+  
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.questionTitle {
+  font-size: $font-size-xl;
+  color: $color-text-primary;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  margin-bottom: $spacing-md;
+}
+
+.questionContent {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+  margin-bottom: $spacing-md;
+}
+
+.questionMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.questionAuthor {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.authorAvatar {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: $radius-round;
+  background-color: $color-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.authorAvatarText {
+  font-size: $font-size-sm;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+}
+
+.authorName {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.questionStats {
+  display: flex;
+  gap: $spacing-lg;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.statIcon {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.statText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.answerSection {
+  padding: $page-padding;
+}
+
+.answerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.answerTitle {
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.answerCount {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.answerList {
+  margin-bottom: $spacing-lg;
+}
+
+.answerItem {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.answerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-md;
+}
+
+.answerAuthor {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.adoptedBadge {
+  font-size: $font-size-xs;
+  color: $color-success;
+  background-color: rgba($color-success, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: $radius-sm;
+}
+
+.answerContent {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+  margin-bottom: $spacing-md;
+}
+
+.answerActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.actionLeft {
+  display: flex;
+  gap: $spacing-lg;
+}
+
+.actionButton {
+  @include button-reset;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  color: $color-text-tertiary;
+  font-size: $font-size-sm;
+  transition: all $transition-base;
+  
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.actionButtonActive {
+  color: $color-primary;
+}
+
+.adoptButton {
+  @include button-reset;
+  background-color: $color-success;
+  color: $color-text-white;
+  font-size: $font-size-xs;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.reportAction {
+  color: $color-error;
+}
+
+.bottomSection {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: $color-bg-card;
+  padding: $spacing-md $page-padding;
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.replyInput {
+  display: flex;
+  gap: $spacing-md;
+  align-items: center;
+}
+
+.replyField {
+  flex: 1;
+  background-color: $color-bg-page;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-button;
+  padding: $spacing-sm $spacing-md;
+}
+
+.replyFieldInput {
+  width: 100%;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+}
+
+.replySendButton {
+  @include button-reset;
+  background-color: $color-primary;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  padding: $spacing-sm $spacing-lg;
+  border-radius: $radius-button;
+  
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.emptyAnswers {
+  text-align: center;
+  padding: $spacing-xl * 2 0;
+}
+
+.emptyAnswersText {
   font-size: $font-size-md;
   color: $color-text-tertiary;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  width: 600rpx;
+  max-width: 90vw;
+}
+
+.modalTitle {
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-md;
+  text-align: center;
+}
+
+.modalTextarea {
+  width: 100%;
+  background-color: $color-bg-page;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  min-height: 200rpx;
+  box-sizing: border-box;
+  resize: none;
+  margin-bottom: $spacing-md;
+}
+
+.modalButtons {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.modalButton {
+  @include button-reset;
+  flex: 1;
+  padding: $spacing-md 0;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.modalButtonCancel {
+  background-color: $color-bg-hover;
+  color: $color-text-secondary;
+}
+
+.modalButtonConfirm {
+  background-color: $color-error;
+  color: $color-text-white;
 }

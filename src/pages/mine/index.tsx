@@ -2,31 +2,38 @@ import React from 'react';
 import { View, Text, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { MoodType, MOOD_LABELS } from '@/types';
+import { moodStorage } from '@/utils/storage';
 import styles from './index.module.scss';
 
 const MinePage: React.FC = () => {
-  const stats = {
-    questions: 5,
-    answers: 23,
-    collections: 12,
-    likes: 156
-  };
+  const [currentMood, setCurrentMood] = React.useState<MoodType | null>(null);
+  const [moodNote, setMoodNote] = React.useState('');
+  const [stats, setStats] = React.useState({ questions: 0, answers: 23, collections: 0, likes: 156 });
 
-  const currentMood: MoodType = 'calm';
-  const moodNote = '今天工作顺利，完成了一个重要项目';
+  React.useEffect(() => {
+    const moodRecords = moodStorage.getRecords();
+    if (moodRecords.length > 0) {
+      setCurrentMood(moodRecords[0].mood);
+      setMoodNote(moodRecords[0].note || '');
+    }
+    const collections = Taro.getStorageSync('my_collections') || [];
+    setStats(prev => ({ ...prev, collections: collections.length }));
+    const questions = Taro.getStorageSync('my_questions') || [];
+    setStats(prev => ({ ...prev, questions: questions.length }));
+  }, []);
 
   const menuItems = [
     {
       icon: '问',
       title: '我的提问',
       desc: '查看发布的所有问题',
-      path: '/pages/question-detail/index?action=my'
+      path: '/pages/my-questions/index'
     },
     {
       icon: '藏',
       title: '我的收藏',
       desc: '收藏的经验和模板话术',
-      path: '/pages/experience-detail/index?action=my'
+      path: '/pages/my-collections/index'
     },
     {
       icon: '答',
@@ -38,7 +45,7 @@ const MinePage: React.FC = () => {
       icon: '情',
       title: '情绪记录',
       desc: '记录职场心情变化',
-      path: ''
+      path: '/pages/mood-records/index'
     }
   ];
 
@@ -54,6 +61,17 @@ const MinePage: React.FC = () => {
       content: '请描述您要举报的内容类型（泄密或人身攻击）',
       showCancel: true
     });
+  };
+
+  const getMoodColor = (mood: MoodType) => {
+    const colors: Record<MoodType, string> = {
+      happy: '#10b981',
+      calm: '#3b82f6',
+      anxious: '#f59e0b',
+      sad: '#8b5cf6',
+      angry: '#ef4444'
+    };
+    return colors[mood];
   };
 
   return (
@@ -111,12 +129,22 @@ const MinePage: React.FC = () => {
         <View className={styles.moodCard}>
           <View className={styles.moodHeader}>
             <Text className={styles.moodLabel}>当前状态</Text>
-            <Text className={`${styles.moodValue} ${styles[`mood${currentMood.charAt(0).toUpperCase() + currentMood.slice(1)}`]}`}>
-              {MOOD_LABELS[currentMood]}
-            </Text>
+            {currentMood && (
+              <Text 
+                className={styles.moodValue}
+                style={{ color: getMoodColor(currentMood) }}
+              >
+                {MOOD_LABELS[currentMood]}
+              </Text>
+            )}
           </View>
-          <Text className={styles.moodNote}>{moodNote}</Text>
-          <Text className={styles.moodTime}>记录时间：2024-01-15 18:30</Text>
+          {moodNote && <Text className={styles.moodNote}>{moodNote}</Text>}
+          <Button 
+            className={styles.moodButton}
+            onClick={() => Taro.navigateTo({ url: '/pages/mood-records/index' })}
+          >
+            {currentMood ? '查看记录' : '记录心情'}
+          </Button>
         </View>
       </View>
 

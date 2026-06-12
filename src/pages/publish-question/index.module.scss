@@ -1,6 +1,6 @@
 @use '@/styles/variables.scss' as *;
 
-.publishVotePage {
+.publishQuestionPage {
   min-height: 100vh;
   background-color: $color-bg-page;
   padding: $page-padding;
@@ -42,108 +42,35 @@
   box-sizing: border-box;
   
   &:focus {
-    border-color: $color-accent;
+    border-color: $color-primary;
   }
 }
 
-.optionsSection {
+.formTextarea {
+  @extend .formInput;
+  min-height: 200rpx;
+  line-height: $line-height-normal;
+  resize: none;
+}
+
+.tagSection {
   margin-bottom: $spacing-lg;
 }
 
-.optionsHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: $spacing-md;
-}
-
-.optionsTitle {
-  font-size: $font-size-md;
-  color: $color-text-primary;
-  font-weight: $font-weight-medium;
-}
-
-.addOptionButton {
-  @include button-reset;
-  color: $color-accent;
-  font-size: $font-size-sm;
-  font-weight: $font-weight-medium;
-  
-  &:active {
-    opacity: 0.7;
-  }
-}
-
-.optionsList {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
-}
-
-.optionItem {
-  display: flex;
-  align-items: center;
-  gap: $spacing-md;
-}
-
-.optionInput {
-  flex: 1;
-  background-color: $color-bg-page;
-  border: 2rpx solid $color-border;
-  border-radius: $radius-md;
-  padding: $spacing-md;
-  font-size: $font-size-md;
-  color: $color-text-primary;
-  box-sizing: border-box;
-}
-
-.removeOptionButton {
-  @include button-reset;
-  width: 64rpx;
-  height: 64rpx;
-  background-color: $color-error;
-  color: $color-text-white;
-  font-size: $font-size-lg;
-  border-radius: $radius-round;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  &:active {
-    opacity: 0.9;
-  }
-}
-
-.settingSection {
-  background-color: $color-bg-card;
-  border-radius: $radius-lg;
-  padding: $spacing-lg;
-  margin-bottom: $spacing-lg;
-  box-shadow: $shadow-card;
-}
-
-.settingGroup {
-  margin-bottom: $spacing-lg;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.settingLabel {
+.tagTitle {
   font-size: $font-size-md;
   color: $color-text-primary;
   font-weight: $font-weight-medium;
   margin-bottom: $spacing-sm;
 }
 
-.settingGrid {
+.tagGrid {
   display: flex;
   gap: $spacing-sm;
   flex-wrap: wrap;
 }
 
-.settingItem {
+.tagItem {
   @include button-reset;
   background-color: $color-bg-page;
   border: 2rpx solid $color-border;
@@ -160,7 +87,87 @@
   }
 }
 
-.settingItemActive {
+.tagItemActive {
+  background-color: $color-primary;
+  border-color: $color-primary;
+  color: $color-text-white;
+}
+
+.inviteSection {
+  margin-bottom: $spacing-lg;
+}
+
+.inviteTitle {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-sm;
+}
+
+.inviteGrid {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+.inviteItem {
+  @include button-reset;
+  background-color: $color-bg-page;
+  border: 2rpx solid $color-border;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-button;
+  transition: all $transition-base;
+  
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.inviteItemActive {
+  background-color: $color-primary-light;
+  border-color: $color-primary-light;
+  color: $color-text-white;
+}
+
+.expireSection {
+  margin-bottom: $spacing-lg;
+}
+
+.expireTitle {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-sm;
+}
+
+.expireGrid {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+.expireItem {
+  @include button-reset;
+  background-color: $color-bg-page;
+  border: 2rpx solid $color-border;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-button;
+  transition: all $transition-base;
+  
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.expireItemActive {
   background-color: $color-accent;
   border-color: $color-accent;
   color: $color-text-white;
@@ -173,7 +180,7 @@
 .submitButton {
   @include button-reset;
   width: 100%;
-  background: linear-gradient(135deg, $color-accent 0%, $color-accent-light 100%);
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
   color: $color-text-white;
   font-size: $font-size-lg;
   font-weight: $font-weight-semibold;

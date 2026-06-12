@@ -8,7 +8,11 @@ export default defineAppConfig({
     'pages/question-detail/index',
     'pages/experience-detail/index',
     'pages/vote-detail/index',
-    'pages/publish-vote/index'
+    'pages/publish-vote/index',
+    'pages/publish-question/index',
+    'pages/my-questions/index',
+    'pages/my-collections/index',
+    'pages/mood-records/index'
   ],
   window: {
     backgroundTextStyle: 'light',

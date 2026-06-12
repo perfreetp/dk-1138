@@ -1,0 +1,51 @@
+@use '@/styles/variables.scss' as *;
+
+.myQuestionsPage {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding: $page-padding;
+}
+
+.listSection {
+  margin-bottom: $spacing-lg;
+}
+
+.scrollView {
+  height: calc(100vh - 100rpx);
+}
+
+.emptyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl * 2 0;
+}
+
+.emptyIcon {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: $radius-round;
+  background-color: $color-bg-hover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: $spacing-lg;
+}
+
+.emptyIconText {
+  font-size: $font-size-xl;
+  color: $color-primary;
+}
+
+.emptyTitle {
+  font-size: $font-size-lg;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-sm;
+}
+
+.emptyDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}

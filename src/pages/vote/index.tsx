@@ -1,23 +1,37 @@
 import React, { useState } from 'react';
-import { View, Text, Button, ScrollView } from '@tarojs/components';
+import { View, Text, Button, ScrollView } from '@tarojs/taro';
 import Taro from '@tarojs/taro';
 import { mockVotes } from '@/data/votes';
+import { voteStorage } from '@/utils/storage';
 import VoteCard from '@/components/VoteCard';
 import EmptyState from '@/components/EmptyState';
 import styles from './index.module.scss';
 
 const VotePage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'voted' | 'notVoted'>('all');
-  const [votes, setVotes] = useState(mockVotes);
+  const [votes, setVotes] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    loadVotes();
+  }, []);
+
+  const loadVotes = () => {
+    const myVotes = voteStorage.getMyVotes();
+    const allVotes = [...myVotes, ...mockVotes];
+    setVotes(allVotes);
+  };
 
   const handleFilterClick = (filter: 'all' | 'voted' | 'notVoted') => {
     setActiveFilter(filter);
+    const myVotes = voteStorage.getMyVotes();
+    const allVotes = [...myVotes, ...mockVotes];
+    
     if (filter === 'all') {
-      setVotes(mockVotes);
+      setVotes(allVotes);
     } else if (filter === 'voted') {
-      setVotes(mockVotes.filter(v => v.hasVoted));
+      setVotes(allVotes.filter(v => v.hasVoted));
     } else {
-      setVotes(mockVotes.filter(v => !v.hasVoted));
+      setVotes(allVotes.filter(v => !v.hasVoted));
     }
   };
 

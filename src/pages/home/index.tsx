@@ -3,6 +3,7 @@ import { View, Text, Button, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { TagType, TAG_LABELS } from '@/types';
 import { mockQuestions, getQuestionsByTag } from '@/data/questions';
+import { questionStorage } from '@/utils/storage';
 import QuestionCard from '@/components/QuestionCard';
 import EmptyState from '@/components/EmptyState';
 import styles from './index.module.scss';
@@ -10,19 +11,33 @@ import styles from './index.module.scss';
 const HomePage: React.FC = () => {
   const [activeTag, setActiveTag] = useState<TagType | 'all'>('all');
   const [questions, setQuestions] = useState(mockQuestions);
+  const [myQuestions, setMyQuestions] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    loadQuestions();
+  }, []);
+
+  const loadQuestions = () => {
+    const stored = questionStorage.getMyQuestions();
+    setMyQuestions(stored);
+    const combined = [...stored, ...mockQuestions];
+    setQuestions(combined);
+  };
 
   const handleTagClick = (tag: TagType | 'all') => {
     setActiveTag(tag);
     if (tag === 'all') {
-      setQuestions(mockQuestions);
+      loadQuestions();
     } else {
-      setQuestions(getQuestionsByTag(tag));
+      const filtered = getQuestionsByTag(tag);
+      const combined = [...myQuestions.filter(q => q.tag === tag), ...filtered];
+      setQuestions(combined);
     }
   };
 
   const handlePublish = () => {
     Taro.navigateTo({
-      url: '/pages/question-detail/index?action=publish'
+      url: '/pages/publish-question/index'
     });
   };
 

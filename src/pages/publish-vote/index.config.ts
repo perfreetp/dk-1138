@@ -1,3 +1,3 @@
 export default definePageConfig({
-  navigationBarTitleText: '发布投票'
+  navigationBarTitleText: '创建投票'
 });
