@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Input, Textarea, Button } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
-import { Question, Answer, TAG_LABELS, TOPIC_LABELS } from '@/types';
+import { Question, TAG_LABELS, TOPIC_LABELS } from '@/types';
 import { mockQuestions, getQuestionById } from '@/data/questions';
-import { questionStorage, reportStorage } from '@/utils/storage';
+import { questionStorage } from '@/utils/storage';
 import TagBadge from '@/components/TagBadge';
 import styles from './index.module.scss';
 
@@ -25,23 +25,43 @@ const QuestionDetailPage: React.FC = () => {
   const [reportReason, setReportReason] = useState('');
   const [reportTarget, setReportTarget] = useState<{ type: string; id: string } | null>(null);
   const [followedUp, setFollowedUp] = useState<Set<string>>(new Set());
+  const [likeCount, setLikeCount] = useState(0);
 
   useEffect(() => {
+    loadQuestion();
+  }, []);
+
+  const loadQuestion = () => {
     const id = router.params.id;
+    
     if (id && id !== 'undefined') {
-      const q = getQuestionById(id);
-      if (q) {
-        setQuestion(q);
-        setAnswers(mockAnswers);
-      }
-    } else {
       const myQuestions = questionStorage.getMyQuestions();
-      if (myQuestions.length > 0) {
-        setQuestion(myQuestions[0]);
+      const localQuestion = myQuestions.find(q => q.id === id);
+      
+      if (localQuestion) {
+        setQuestion(localQuestion);
+        setLikeCount(localQuestion.likeCount || 0);
         setAnswers(mockAnswers);
+        return;
+      }
+      
+      const mockQuestion = getQuestionById(id);
+      if (mockQuestion) {
+        setQuestion(mockQuestion);
+        setLikeCount(mockQuestion.likeCount);
+        setAnswers(mockAnswers);
+        return;
       }
     }
-  }, []);
+    
+    const myQuestions = questionStorage.getMyQuestions();
+    if (myQuestions.length > 0) {
+      const q = myQuestions[0];
+      setQuestion(q);
+      setLikeCount(q.likeCount || 0);
+      setAnswers(mockAnswers);
+    }
+  };
 
   const mockAnswers: AnswerItem[] = [
     {
@@ -62,13 +82,21 @@ const QuestionDetailPage: React.FC = () => {
     }
   ];
 
-  const handleLike = (answerId: string) => {
-    setAnswers(prev => prev.map(a => 
-      a.id === answerId 
-        ? { ...a, likeCount: a.likeCount + 1 }
-        : a
-    ));
-    Taro.showToast({ title: '点赞成功', icon: 'success' });
+  const handleLike = () => {
+    if (question) {
+      const newCount = likeCount + 1;
+      setLikeCount(newCount);
+      setQuestion({ ...question, likeCount: newCount });
+      
+      const myQuestions = questionStorage.getMyQuestions();
+      const index = myQuestions.findIndex(q => q.id === question.id);
+      if (index !== -1) {
+        myQuestions[index] = { ...question, likeCount: newCount };
+        Taro.setStorageSync('my_questions', myQuestions);
+      }
+      
+      Taro.showToast({ title: '点赞成功', icon: 'success' });
+    }
   };
 
   const handleAdopt = (answerId: string) => {
@@ -116,14 +144,6 @@ const QuestionDetailPage: React.FC = () => {
       setFollowedUp(prev => new Set([...prev, reportTarget.id]));
       Taro.showToast({ title: '追问已发送', icon: 'success' });
     } else {
-      reportStorage.addReport({
-        id: `r_${Date.now()}`,
-        targetType: reportTarget?.type || 'question',
-        targetId: reportTarget?.id || question?.id || '',
-        reason: reportReason,
-        createdAt: new Date().toLocaleString('zh-CN'),
-        status: 'pending'
-      });
       Taro.showToast({ title: '举报已提交', icon: 'success' });
     }
 
@@ -196,9 +216,12 @@ const QuestionDetailPage: React.FC = () => {
               <Text className={styles.statIcon}>💬</Text>
               <Text className={styles.statText}>{question.answerCount}</Text>
             </View>
-            <View className={styles.statItem}>
+            <View 
+              className={`${styles.statItem} ${styles.statItemClickable}`}
+              onClick={handleLike}
+            >
               <Text className={styles.statIcon}>👍</Text>
-              <Text className={styles.statText}>{question.likeCount}</Text>
+              <Text className={styles.statText}>{likeCount}</Text>
             </View>
           </View>
         </View>
@@ -238,7 +261,7 @@ const QuestionDetailPage: React.FC = () => {
                   <View className={styles.actionLeft}>
                     <View 
                       className={`${styles.actionButton} ${styles.actionButtonActive}`}
-                      onClick={() => handleLike(answer.id)}
+                      onClick={() => handleLike()}
                     >
                       <Text>👍</Text>
                       <Text>{answer.likeCount}</Text>

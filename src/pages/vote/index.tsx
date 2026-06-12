@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Button, ScrollView } from '@tarojs/taro';
+import { View, Text, Button, ScrollView } from '@tarojs/components';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { mockVotes } from '@/data/votes';
 import { voteStorage } from '@/utils/storage';
@@ -14,12 +14,26 @@ const VotePage: React.FC = () => {
 
   const loadVotes = () => {
     const myVotes = voteStorage.getMyVotes();
-    let allVotes = [...myVotes, ...mockVotes];
+    let allVotes: any[] = [];
+    
+    myVotes.forEach(vote => {
+      const existingIndex = allVotes.findIndex(v => v.id === vote.id);
+      if (existingIndex === -1) {
+        allVotes.push(vote);
+      }
+    });
+    
+    mockVotes.forEach(vote => {
+      const existingIndex = allVotes.findIndex(v => v.id === vote.id);
+      if (existingIndex === -1) {
+        allVotes.push(vote);
+      }
+    });
     
     if (activeFilter === 'voted') {
-      allVotes = allVotes.filter(v => v.hasVoted);
+      allVotes = allVotes.filter(v => v.hasVoted === true);
     } else if (activeFilter === 'notVoted') {
-      allVotes = allVotes.filter(v => !v.hasVoted);
+      allVotes = allVotes.filter(v => v.hasVoted !== true);
     }
     
     setVotes(allVotes);
@@ -32,13 +46,28 @@ const VotePage: React.FC = () => {
 
   const handleFilterClick = (filter: 'all' | 'voted' | 'notVoted') => {
     setActiveFilter(filter);
+    
     const myVotes = voteStorage.getMyVotes();
-    let allVotes = [...myVotes, ...mockVotes];
+    let allVotes: any[] = [];
+    
+    myVotes.forEach(vote => {
+      const existingIndex = allVotes.findIndex(v => v.id === vote.id);
+      if (existingIndex === -1) {
+        allVotes.push(vote);
+      }
+    });
+    
+    mockVotes.forEach(vote => {
+      const existingIndex = allVotes.findIndex(v => v.id === vote.id);
+      if (existingIndex === -1) {
+        allVotes.push(vote);
+      }
+    });
     
     if (filter === 'voted') {
-      allVotes = allVotes.filter(v => v.hasVoted);
+      allVotes = allVotes.filter(v => v.hasVoted === true);
     } else if (filter === 'notVoted') {
-      allVotes = allVotes.filter(v => !v.hasVoted);
+      allVotes = allVotes.filter(v => v.hasVoted !== true);
     }
     
     setVotes(allVotes);

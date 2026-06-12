@@ -104,6 +104,14 @@
   gap: $spacing-xs;
 }
 
+.statItemClickable {
+  cursor: pointer;
+  
+  &:active {
+    opacity: 0.7;
+  }
+}
+
 .statIcon {
   font-size: $font-size-sm;
   color: $color-text-tertiary;

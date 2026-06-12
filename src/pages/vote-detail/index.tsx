@@ -29,23 +29,40 @@ const VoteDetailPage: React.FC = () => {
   const router = useRouter();
   const [vote, setVote] = useState<VoteData | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const id = router.params.id;
-    let foundVote: VoteData | undefined;
+    loadVote();
+  }, []);
 
+  const loadVote = () => {
+    const id = router.params.id;
+    
     if (id && id !== 'undefined') {
-      foundVote = getVoteById(id) as VoteData | undefined;
-      if (!foundVote) {
-        const myVotes = voteStorage.getMyVotes();
-        foundVote = myVotes.find(v => v.id === id);
+      const localVote = voteStorage.getVoteById(id);
+      if (localVote) {
+        setVote(localVote);
+        setSelectedOptions([]);
+        setIsLoaded(true);
+        return;
+      }
+      
+      const mockVote = getVoteById(id);
+      if (mockVote) {
+        setVote(mockVote);
+        setSelectedOptions([]);
+        setIsLoaded(true);
+        return;
       }
     }
-
-    if (foundVote) {
-      setVote(foundVote);
+    
+    const myVotes = voteStorage.getMyVotes();
+    if (myVotes.length > 0) {
+      setVote(myVotes[0]);
+      setSelectedOptions([]);
+      setIsLoaded(true);
     }
-  }, []);
+  };
 
   const toggleOption = (optionId: string) => {
     if (vote?.hasVoted) return;
@@ -97,11 +114,28 @@ const VoteDetailPage: React.FC = () => {
       hasVoted: true
     };
 
-    setVote(updatedVote);
     voteStorage.updateVote(updatedVote);
+    setVote(updatedVote);
+    
+    const myVotes = voteStorage.getMyVotes();
+    const index = myVotes.findIndex(v => v.id === vote.id);
+    if (index !== -1) {
+      myVotes[index] = updatedVote;
+      Taro.setStorageSync('my_votes', myVotes);
+    }
 
     Taro.showToast({ title: '投票成功', icon: 'success' });
   };
+
+  if (!isLoaded) {
+    return (
+      <View className={styles.voteDetailPage}>
+        <View className={styles.emptyVote}>
+          <Text className={styles.emptyVoteText}>加载中...</Text>
+        </View>
+      </View>
+    );
+  }
 
   if (!vote) {
     return (
@@ -135,7 +169,7 @@ const VoteDetailPage: React.FC = () => {
         </Text>
         <View className={styles.optionsList}>
           {vote.options.map(option => {
-            const isSelected = selectedOptions.includes(option.id) || vote.hasVoted;
+            const isSelected = selectedOptions.includes(option.id) || (vote.hasVoted && option.voteCount > 0);
             return (
               <View
                 key={option.id}
