@@ -1,0 +1,94 @@
+@use '@/styles/variables.scss' as *;
+
+.experiencePage {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding: $page-padding;
+  padding-bottom: $spacing-xl * 3;
+}
+
+.headerSection {
+  margin-bottom: $spacing-lg;
+}
+
+.headerTitle {
+  font-size: $font-size-xxl;
+  color: $color-text-primary;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-sm;
+}
+
+.headerDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.topicSection {
+  margin-bottom: $spacing-lg;
+}
+
+.topicTitle {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-md;
+}
+
+.topicScroll {
+  width: 100%;
+  @include scroll-x-container;
+}
+
+.topicList {
+  display: inline-flex;
+  gap: $spacing-sm;
+  padding-right: $page-padding;
+}
+
+.topicItem {
+  @include scroll-x-item(160rpx);
+  @include button-reset;
+  background-color: $color-bg-card;
+  border: 2rpx solid $color-border;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-lg;
+  transition: all $transition-base;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.topicItemActive {
+  background-color: $color-primary;
+  border-color: $color-primary;
+  color: $color-text-white;
+}
+
+.listSection {
+  margin-bottom: $spacing-lg;
+}
+
+.listTitle {
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-md;
+}
+
+.scrollView {
+  height: calc(100vh - 300rpx);
+}
+
+.emptyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl * 2 0;
+}

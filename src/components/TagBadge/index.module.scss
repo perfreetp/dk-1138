@@ -1,0 +1,46 @@
+@use '@/styles/variables.scss' as *;
+
+.tagBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  white-space: nowrap;
+}
+
+.tagSmall {
+  padding: 4rpx 12rpx;
+}
+
+.tagComfort {
+  background-color: $color-tag-comfort;
+  
+  .tagText {
+    color: $color-tag-comfort-text;
+    font-size: $font-size-sm;
+  }
+}
+
+.tagSolution {
+  background-color: $color-tag-solution;
+  
+  .tagText {
+    color: $color-tag-solution-text;
+    font-size: $font-size-sm;
+  }
+}
+
+.tagResource {
+  background-color: $color-tag-resource;
+  
+  .tagText {
+    color: $color-tag-resource-text;
+    font-size: $font-size-sm;
+  }
+}
+
+.tagText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}

@@ -1,0 +1,86 @@
+@use '@/styles/variables.scss' as *;
+
+.cardContainer {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+  
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.topicText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.cardTitle {
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+  margin-bottom: $spacing-sm;
+  @include text-ellipsis-multi(2);
+}
+
+.cardContent {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+  margin-bottom: $spacing-md;
+  @include text-ellipsis-multi(2);
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.authorInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.authorText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.floorText,
+.industryText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  background-color: $color-bg-hover;
+  padding: 2rpx 8rpx;
+  border-radius: $radius-xs;
+}
+
+.statsInfo {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.statText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.timeText {
+  font-size: $font-size-xs;
+  color: $color-text-disabled;
+}
