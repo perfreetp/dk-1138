@@ -1,38 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, Button, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
-import { collectionStorage } from '@/utils/storage';
+import Taro, { useDidShow } from '@tarojs/taro';
+import { collectionStorage, CollectionItem } from '@/utils/storage';
 import EmptyState from '@/components/EmptyState';
 import styles from './index.module.scss';
 
-interface Collection {
-  id: string;
-  type: string;
-  relatedId: string;
-  title: string;
-  createdAt: string;
-}
-
 const MyCollectionsPage: React.FC = () => {
-  const [collections, setCollections] = useState<Collection[]>([]);
+  const [collections, setCollections] = useState<CollectionItem[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
+  const loadCollections = () => {
     const myCollections = collectionStorage.getCollections();
     setCollections(myCollections);
-  }, []);
+    setIsLoaded(true);
+  };
+
+  useDidShow(() => {
+    loadCollections();
+  });
 
   const handleRemove = (id: string) => {
     collectionStorage.removeCollection(id);
-    setCollections(collections.filter(c => c.id !== id));
+    loadCollections();
     Taro.showToast({ title: '已取消收藏', icon: 'success' });
   };
 
-  const handleClick = (item: Collection) => {
+  const handleClick = (item: CollectionItem) => {
     if (item.type === 'experience') {
       Taro.navigateTo({ url: `/pages/experience-detail/index?id=${item.relatedId}` });
-    } else if (item.type === 'question') {
-      Taro.navigateTo({ url: `/pages/question-detail/index?id=${item.relatedId}` });
     }
+  };
+
+  const handleCopyTemplate = (content: string) => {
+    Taro.setClipboardData({
+      data: content,
+      success: () => {
+        Taro.showToast({ title: '已复制', icon: 'success' });
+      }
+    });
   };
 
   const getTypeLabel = (type: string) => {
@@ -46,27 +51,60 @@ const MyCollectionsPage: React.FC = () => {
     }
   };
 
+  const getTypeStyle = (type: string) => {
+    switch (type) {
+      case 'experience':
+        return styles.typeExperience;
+      case 'template':
+        return styles.typeTemplate;
+      default:
+        return '';
+    }
+  };
+
   return (
     <View className={styles.myCollectionsPage}>
       <View className={styles.listSection}>
         <ScrollView className={styles.scrollView} scrollY>
-          {collections.length > 0 ? (
+          {isLoaded && collections.length > 0 ? (
             collections.map(item => (
-              <View key={item.id} className={styles.collectionItem} onClick={() => handleClick(item)}>
-                <View className={styles.collectionContent}>
-                  <Text className={styles.collectionType}>{getTypeLabel(item.type)}</Text>
+              <View key={item.id} className={styles.collectionItem}>
+                <View onClick={() => handleClick(item)}>
+                  <View className={styles.collectionHeader}>
+                    <Text className={`${styles.collectionType} ${getTypeStyle(item.type)}`}>
+                      {getTypeLabel(item.type)}
+                    </Text>
+                  </View>
                   <Text className={styles.collectionTitle}>{item.title}</Text>
+                  {item.type === 'template' && item.content && (
+                    <Text className={styles.templateContent} numberOfLines={2}>
+                      {item.content}
+                    </Text>
+                  )}
                   <Text className={styles.collectionTime}>{item.createdAt}</Text>
                 </View>
-                <Button 
-                  className={styles.removeButton}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemove(item.id);
-                  }}
-                >
-                  ×
-                </Button>
+                <View className={styles.actionButtons}>
+                  {item.type === 'template' && item.content && (
+                    <Button 
+                      className={styles.copyButton}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopyTemplate(item.content!);
+                      }}
+                    >
+                      复制
+                    </Button>
+                  )}
+                  <Button 
+                    className={styles.removeButton}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemove(item.id);
+                    }}
+                  >
+                    ×
+                  </Button>
+                </View>
               </View>
             ))
           ) : (

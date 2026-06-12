@@ -38,6 +38,15 @@ export const storage = {
 
 export { STORAGE_KEYS };
 
+export interface CollectionItem {
+  id: string;
+  type: 'question' | 'experience' | 'template';
+  relatedId: string;
+  title: string;
+  content?: string;
+  createdAt: string;
+}
+
 export const questionStorage = {
   getMyQuestions: () => storage.get(STORAGE_KEYS.MY_QUESTIONS, []),
   addQuestion: (question) => {
@@ -48,23 +57,35 @@ export const questionStorage = {
 };
 
 export const collectionStorage = {
-  getCollections: () => storage.get(STORAGE_KEYS.MY_COLLECTIONS, []),
-  addCollection: (item) => {
+  getCollections: (): CollectionItem[] => storage.get(STORAGE_KEYS.MY_COLLECTIONS, []),
+  addCollection: (item: CollectionItem) => {
     const collections = collectionStorage.getCollections();
-    const exists = collections.some(c => c.relatedId === item.relatedId && c.type === item.type);
+    const exists = collections.some(c => 
+      (c.type === item.type && c.relatedId === item.relatedId) ||
+      (item.type === 'template' && c.type === 'template' && c.content === item.content)
+    );
     if (!exists) {
       collections.unshift(item);
       storage.set(STORAGE_KEYS.MY_COLLECTIONS, collections);
     }
   },
-  removeCollection: (id) => {
+  removeCollection: (id: string) => {
     const collections = collectionStorage.getCollections();
     const filtered = collections.filter(c => c.id !== id);
+    storage.set(STORAGE_KEYS.MY_COLLECTIONS, filtered);
+  },
+  removeByRelatedId: (relatedId: string, type: string) => {
+    const collections = collectionStorage.getCollections();
+    const filtered = collections.filter(c => !(c.relatedId === relatedId && c.type === type));
     storage.set(STORAGE_KEYS.MY_COLLECTIONS, filtered);
   },
   isCollected: (relatedId: string, type: string) => {
     const collections = collectionStorage.getCollections();
     return collections.some(c => c.relatedId === relatedId && c.type === type);
+  },
+  isTemplateCollected: (content: string) => {
+    const collections = collectionStorage.getCollections();
+    return collections.some(c => c.type === 'template' && c.content === content);
   }
 };
 
@@ -91,6 +112,10 @@ export const voteStorage = {
       votes[index] = updatedVote;
       storage.set(STORAGE_KEYS.MY_VOTES, votes);
     }
+  },
+  getVoteById: (id: string) => {
+    const votes = voteStorage.getMyVotes();
+    return votes.find(v => v.id === id);
   }
 };
 

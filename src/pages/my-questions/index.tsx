@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
+import { useDidShow } from '@tarojs/taro';
 import { questionStorage } from '@/utils/storage';
 import QuestionCard from '@/components/QuestionCard';
 import EmptyState from '@/components/EmptyState';
@@ -7,17 +8,23 @@ import styles from './index.module.scss';
 
 const MyQuestionsPage: React.FC = () => {
   const [questions, setQuestions] = useState<any[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
+  const loadQuestions = () => {
     const myQuestions = questionStorage.getMyQuestions();
     setQuestions(myQuestions);
-  }, []);
+    setIsLoaded(true);
+  };
+
+  useDidShow(() => {
+    loadQuestions();
+  });
 
   return (
     <View className={styles.myQuestionsPage}>
       <View className={styles.listSection}>
         <ScrollView className={styles.scrollView} scrollY>
-          {questions.length > 0 ? (
+          {isLoaded && questions.length > 0 ? (
             questions.map(question => (
               <QuestionCard key={question.id} question={question} />
             ))

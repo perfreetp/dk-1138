@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, Textarea, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import React, { useState } from 'react';
+import { View, Text, Button, Textarea } from '@tarojs/components';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { MoodType, MOOD_LABELS } from '@/types';
 import { moodStorage } from '@/utils/storage';
 import EmptyState from '@/components/EmptyState';
@@ -25,15 +25,17 @@ const MoodRecordsPage: React.FC = () => {
   const [currentMood, setCurrentMood] = useState<MoodType | null>(null);
   const [note, setNote] = useState('');
   const [records, setRecords] = useState<MoodRecord[]>([]);
-
-  useEffect(() => {
-    loadRecords();
-  }, []);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const loadRecords = () => {
     const moodRecords = moodStorage.getRecords();
     setRecords(moodRecords);
+    setIsLoaded(true);
   };
+
+  useDidShow(() => {
+    loadRecords();
+  });
 
   const handleSave = () => {
     if (!currentMood) {
@@ -101,8 +103,8 @@ const MoodRecordsPage: React.FC = () => {
 
       <View className={styles.historySection}>
         <Text className={styles.historyTitle}>历史记录</Text>
-        <ScrollView scrollY style={{ height: 'calc(100vh - 500rpx)' }}>
-          {records.length > 0 ? (
+        <View className={styles.historyList}>
+          {isLoaded && records.length > 0 ? (
             records.map(record => (
               <View key={record.id} className={styles.historyItem}>
                 <View className={styles.historyHeader}>
@@ -125,7 +127,7 @@ const MoodRecordsPage: React.FC = () => {
               description="记录你的职场心情变化" 
             />
           )}
-        </ScrollView>
+        </View>
       </View>
     </View>
   );

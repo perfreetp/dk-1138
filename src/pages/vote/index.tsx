@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Button, ScrollView } from '@tarojs/taro';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { mockVotes } from '@/data/votes';
 import { voteStorage } from '@/utils/storage';
 import VoteCard from '@/components/VoteCard';
@@ -10,29 +10,38 @@ import styles from './index.module.scss';
 const VotePage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'voted' | 'notVoted'>('all');
   const [votes, setVotes] = useState<any[]>([]);
-
-  React.useEffect(() => {
-    loadVotes();
-  }, []);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const loadVotes = () => {
     const myVotes = voteStorage.getMyVotes();
-    const allVotes = [...myVotes, ...mockVotes];
+    let allVotes = [...myVotes, ...mockVotes];
+    
+    if (activeFilter === 'voted') {
+      allVotes = allVotes.filter(v => v.hasVoted);
+    } else if (activeFilter === 'notVoted') {
+      allVotes = allVotes.filter(v => !v.hasVoted);
+    }
+    
     setVotes(allVotes);
+    setIsLoaded(true);
   };
+
+  useDidShow(() => {
+    loadVotes();
+  });
 
   const handleFilterClick = (filter: 'all' | 'voted' | 'notVoted') => {
     setActiveFilter(filter);
     const myVotes = voteStorage.getMyVotes();
-    const allVotes = [...myVotes, ...mockVotes];
+    let allVotes = [...myVotes, ...mockVotes];
     
-    if (filter === 'all') {
-      setVotes(allVotes);
-    } else if (filter === 'voted') {
-      setVotes(allVotes.filter(v => v.hasVoted));
-    } else {
-      setVotes(allVotes.filter(v => !v.hasVoted));
+    if (filter === 'voted') {
+      allVotes = allVotes.filter(v => v.hasVoted);
+    } else if (filter === 'notVoted') {
+      allVotes = allVotes.filter(v => !v.hasVoted);
     }
+    
+    setVotes(allVotes);
   };
 
   const handlePublish = () => {
@@ -84,7 +93,7 @@ const VotePage: React.FC = () => {
       <View className={styles.listSection}>
         <Text className={styles.listTitle}>进行中的投票</Text>
         <ScrollView className={styles.scrollView} scrollY>
-          {votes.length > 0 ? (
+          {isLoaded && votes.length > 0 ? (
             votes.map(vote => (
               <VoteCard key={vote.id} vote={vote} />
             ))

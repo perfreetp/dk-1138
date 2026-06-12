@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Button, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { TagType, TAG_LABELS } from '@/types';
 import { mockQuestions, getQuestionsByTag } from '@/data/questions';
 import { questionStorage } from '@/utils/storage';
@@ -10,28 +10,35 @@ import styles from './index.module.scss';
 
 const HomePage: React.FC = () => {
   const [activeTag, setActiveTag] = useState<TagType | 'all'>('all');
-  const [questions, setQuestions] = useState(mockQuestions);
-  const [myQuestions, setMyQuestions] = useState<any[]>([]);
-
-  React.useEffect(() => {
-    loadQuestions();
-  }, []);
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const loadQuestions = () => {
     const stored = questionStorage.getMyQuestions();
-    setMyQuestions(stored);
-    const combined = [...stored, ...mockQuestions];
-    setQuestions(combined);
+    if (activeTag === 'all') {
+      const combined = [...stored, ...mockQuestions];
+      setQuestions(combined);
+    } else {
+      const filtered = getQuestionsByTag(activeTag);
+      const combined = [...stored.filter(q => q.tag === activeTag), ...filtered];
+      setQuestions(combined);
+    }
+    setIsLoaded(true);
   };
+
+  useDidShow(() => {
+    loadQuestions();
+  });
 
   const handleTagClick = (tag: TagType | 'all') => {
     setActiveTag(tag);
     if (tag === 'all') {
-      loadQuestions();
+      const stored = questionStorage.getMyQuestions();
+      setQuestions([...stored, ...mockQuestions]);
     } else {
+      const stored = questionStorage.getMyQuestions();
       const filtered = getQuestionsByTag(tag);
-      const combined = [...myQuestions.filter(q => q.tag === tag), ...filtered];
-      setQuestions(combined);
+      setQuestions([...stored.filter(q => q.tag === tag), ...filtered]);
     }
   };
 
@@ -84,7 +91,7 @@ const HomePage: React.FC = () => {
       <View className={styles.listSection}>
         <Text className={styles.listTitle}>最新提问</Text>
         <ScrollView className={styles.scrollView} scrollY>
-          {questions.length > 0 ? (
+          {isLoaded && questions.length > 0 ? (
             questions.map(question => (
               <QuestionCard key={question.id} question={question} />
             ))

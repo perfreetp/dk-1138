@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, Button } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { MoodType, MOOD_LABELS } from '@/types';
-import { moodStorage } from '@/utils/storage';
+import { moodStorage, collectionStorage, questionStorage } from '@/utils/storage';
 import styles from './index.module.scss';
 
 const MinePage: React.FC = () => {
@@ -10,17 +10,24 @@ const MinePage: React.FC = () => {
   const [moodNote, setMoodNote] = React.useState('');
   const [stats, setStats] = React.useState({ questions: 0, answers: 23, collections: 0, likes: 156 });
 
-  React.useEffect(() => {
+  const loadData = React.useCallback(() => {
     const moodRecords = moodStorage.getRecords();
     if (moodRecords.length > 0) {
       setCurrentMood(moodRecords[0].mood);
       setMoodNote(moodRecords[0].note || '');
     }
-    const collections = Taro.getStorageSync('my_collections') || [];
-    setStats(prev => ({ ...prev, collections: collections.length }));
-    const questions = Taro.getStorageSync('my_questions') || [];
-    setStats(prev => ({ ...prev, questions: questions.length }));
+    const collections = collectionStorage.getCollections();
+    const questions = questionStorage.getMyQuestions();
+    setStats(prev => ({ 
+      ...prev, 
+      collections: collections.length,
+      questions: questions.length
+    }));
   }, []);
+
+  useDidShow(() => {
+    loadData();
+  });
 
   const menuItems = [
     {

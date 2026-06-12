@@ -184,6 +184,12 @@
   color: $color-text-white;
 }
 
+.templateButtonActive {
+  background-color: $color-accent;
+  border-color: $color-accent;
+  color: $color-text-white;
+}
+
 .copySuccess {
   background-color: $color-success;
   border-color: $color-success;

@@ -3,13 +3,14 @@ import { View, Text, Button } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import { Experience, TOPIC_LABELS } from '@/types';
 import { mockExperiences, getExperienceById } from '@/data/experiences';
-import { collectionStorage } from '@/utils/storage';
+import { collectionStorage, CollectionItem } from '@/utils/storage';
 import styles from './index.module.scss';
 
 const ExperienceDetailPage: React.FC = () => {
   const router = useRouter();
   const [experience, setExperience] = useState<Experience | null>(null);
-  const [isCollected, setIsCollected] = useState(false);
+  const [isExperienceCollected, setIsExperienceCollected] = useState(false);
+  const [isTemplateCollected, setIsTemplateCollected] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
@@ -18,7 +19,10 @@ const ExperienceDetailPage: React.FC = () => {
       const exp = getExperienceById(id);
       if (exp) {
         setExperience(exp);
-        setIsCollected(collectionStorage.isCollected(exp.id, 'experience'));
+        setIsExperienceCollected(collectionStorage.isCollected(exp.id, 'experience'));
+        if (exp.template) {
+          setIsTemplateCollected(collectionStorage.isTemplateCollected(exp.template));
+        }
       }
     }
   }, []);
@@ -33,22 +37,50 @@ const ExperienceDetailPage: React.FC = () => {
     }
   };
 
-  const handleCollect = () => {
+  const handleCollectExperience = () => {
     if (!experience) return;
 
-    if (isCollected) {
+    if (isExperienceCollected) {
+      collectionStorage.removeByRelatedId(experience.id, 'experience');
+      setIsExperienceCollected(false);
       Taro.showToast({ title: '已取消收藏', icon: 'none' });
-      setIsCollected(false);
     } else {
-      collectionStorage.addCollection({
+      const item: CollectionItem = {
         id: `c_${Date.now()}`,
         type: 'experience',
         relatedId: experience.id,
         title: experience.title,
         createdAt: new Date().toLocaleString('zh-CN')
-      });
-      setIsCollected(true);
+      };
+      collectionStorage.addCollection(item);
+      setIsExperienceCollected(true);
       Taro.showToast({ title: '收藏成功', icon: 'success' });
+    }
+  };
+
+  const handleCollectTemplate = () => {
+    if (!experience?.template) return;
+
+    if (isTemplateCollected) {
+      const collections = collectionStorage.getCollections();
+      const filtered = collections.filter(c => 
+        !(c.type === 'template' && c.content === experience.template)
+      );
+      Taro.setStorageSync('my_collections', filtered);
+      setIsTemplateCollected(false);
+      Taro.showToast({ title: '已取消收藏', icon: 'none' });
+    } else {
+      const item: CollectionItem = {
+        id: `c_${Date.now()}`,
+        type: 'template',
+        relatedId: experience.id,
+        title: `模板：${experience.title.substring(0, 10)}...`,
+        content: experience.template,
+        createdAt: new Date().toLocaleString('zh-CN')
+      };
+      collectionStorage.addCollection(item);
+      setIsTemplateCollected(true);
+      Taro.showToast({ title: '模板收藏成功', icon: 'success' });
     }
   };
 
@@ -108,10 +140,10 @@ const ExperienceDetailPage: React.FC = () => {
             👍 点赞
           </Button>
           <Button 
-            className={`${styles.actionButton} ${isCollected ? styles.actionButtonActive : ''}`}
-            onClick={handleCollect}
+            className={`${styles.actionButton} ${isExperienceCollected ? styles.actionButtonActive : ''}`}
+            onClick={handleCollectExperience}
           >
-            {isCollected ? '⭐ 已收藏' : '☆ 收藏'}
+            {isExperienceCollected ? '⭐ 已收藏' : '☆ 收藏经验'}
           </Button>
         </View>
       </View>
@@ -138,10 +170,10 @@ const ExperienceDetailPage: React.FC = () => {
               {copySuccess ? '✓ 已复制' : '复制模板'}
             </Button>
             <Button 
-              className={`${styles.actionButton} ${isCollected ? styles.actionButtonActive : ''}`}
-              onClick={handleCollect}
+              className={`${styles.actionButton} ${isTemplateCollected ? styles.templateButtonActive : ''}`}
+              onClick={handleCollectTemplate}
             >
-              {isCollected ? '✓ 已收藏' : '收藏模板'}
+              {isTemplateCollected ? '✓ 已收藏' : '⭐ 收藏模板'}
             </Button>
           </View>
         </View>
